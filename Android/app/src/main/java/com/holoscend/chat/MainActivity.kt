@@ -1,0 +1,83 @@
+package com.holoscend.chat
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.holoscend.chat.ui.theme.ChatTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            ChatApp()
+        }
+    }
+}
+
+@Composable
+fun ChatApp() {
+    ChatTheme {
+        Surface {
+            ChatScreen()
+        }
+    }
+}
+
+@Composable
+fun ChatScreen() {
+    var userInput by remember { mutableStateOf("") }
+    var responseText by remember { mutableStateOf("Model response will appear here") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // Top section: Response display
+        Text(
+            text = responseText,
+            modifier = Modifier
+                .weight(1f)
+                .padding(bottom = 16.dp)
+        )
+
+        // Bottom section: Input and Send button
+        Column(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = userInput,
+                onValueChange = { userInput = it },
+                label = { Text("Type your message") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+            Button(
+                onClick = {
+                    responseText = "You said: $userInput"
+                    userInput = ""
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Send")
+            }
+        }
+    }
+}
