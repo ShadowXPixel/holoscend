@@ -1,6 +1,7 @@
 package com.holoscend.chat
 
 import android.os.Bundle
+import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
