@@ -29,7 +29,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+external fun stringFromJNI(): String
 
+init {
+    System.loadLibrary("native-lib")
+}
 @Composable
 fun ChatApp() {
     ChatTheme {
@@ -69,7 +73,7 @@ fun ChatScreen() {
             )
             Button(
                 onClick = {
-                    responseText = "You said: $userInput"
+                    responseText = stringFromJNI()
                     userInput = ""
                 },
                 modifier = Modifier.fillMaxWidth()
