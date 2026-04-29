@@ -22,17 +22,19 @@ import androidx.compose.ui.unit.dp
 import com.holoscend.chat.ui.theme.ChatTheme
 
 class MainActivity : ComponentActivity() {
+
+    external fun stringFromJNI(): String
+
+    init {
+        System.loadLibrary("native-lib")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ChatApp()
         }
     }
-}
-external fun stringFromJNI(): String
-
-init {
-    System.loadLibrary("native-lib")
 }
 @Composable
 fun ChatApp() {
