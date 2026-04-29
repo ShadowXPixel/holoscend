@@ -48,7 +48,12 @@ fun ChatApp() {
 fun ChatScreen(getResponse: () -> String) {
     var userInput by remember { mutableStateOf("") }
     var responseText by remember { mutableStateOf("Model response will appear here") }
-
+    
+    LaunchedEffect(Unit) {
+        val file = File(context.filesDir, "test.txt")
+        file.writeText("hello bro")
+    }
+   
     Column(
         modifier = Modifier
             .fillMaxSize()
