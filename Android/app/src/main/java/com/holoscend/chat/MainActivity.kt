@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ChatApp()
+            ChatScreen(getResponse = { stringFromJNI() })
         }
     }
 }
@@ -46,7 +46,7 @@ fun ChatApp() {
 }
 
 @Composable
-fun ChatScreen() {
+fun ChatScreen(getResponse: () -> String) {
     var userInput by remember { mutableStateOf("") }
     var responseText by remember { mutableStateOf("Model response will appear here") }
 
@@ -75,7 +75,7 @@ fun ChatScreen() {
             )
             Button(
                 onClick = {
-                    responseText = stringFromJNI()
+                    responseText = getResponse()
                     userInput = ""
                 },
                 modifier = Modifier.fillMaxWidth()
