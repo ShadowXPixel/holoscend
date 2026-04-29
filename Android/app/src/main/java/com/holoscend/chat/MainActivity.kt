@@ -40,8 +40,7 @@ class MainActivity : ComponentActivity() {
 fun ChatApp() {
     ChatTheme {
         Surface {
-            ChatScreen()
-        }
+            ChatScreen(getResponse = { stringFromJNI() })        }
     }
 }
 
