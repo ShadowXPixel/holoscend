@@ -6,7 +6,11 @@ plugins {
 android {
     namespace 'com.holoscend.chat'
     compileSdk 34
-
+    externalNativeBuild {
+    cmake {
+        path "src/main/cpp/CMakeLists.txt"
+    }
+}
     defaultConfig {
         applicationId "com.holoscend.chat"
         minSdk 24
