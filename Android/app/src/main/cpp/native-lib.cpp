@@ -80,7 +80,7 @@ Java_com_holoscend_chat_MainActivity_completion(JNIEnv *env, jobject thiz, jstri
     }
 
     // Clear KV cache
-    llama_kv_cache_clear(ctx);
+    llama_memory_clear(llama_get_memory(ctx), true);
 
     // Evaluate prompt
     for (size_t i = 0; i < tokens.size(); i += 512) {
