@@ -20,6 +20,15 @@ Java_com_holoscend_chat_MainActivity_initLlama(JNIEnv *env, jobject thiz, jstrin
 
     LOGI("Loading model from %s", path);
 
+    if (ctx) {
+        llama_free(ctx);
+        ctx = nullptr;
+    }
+    if (model) {
+        llama_model_free(model);
+        model = nullptr;
+    }
+
     llama_backend_init();
 
     auto mparams = llama_model_default_params();
@@ -36,7 +45,7 @@ Java_com_holoscend_chat_MainActivity_initLlama(JNIEnv *env, jobject thiz, jstrin
     cparams.n_batch = 512;
     cparams.n_threads = 4; // Use 4 threads for mobile
 
-    ctx = llama_new_context_with_model(model, cparams);
+    ctx = llama_init_from_model(model, cparams);
     if (ctx == nullptr) {
         LOGE("Failed to create context");
         llama_model_free(model);
@@ -77,7 +86,7 @@ Java_com_holoscend_chat_MainActivity_completion(JNIEnv *env, jobject thiz, jstri
     for (size_t i = 0; i < tokens.size(); i += 512) {
         int n_eval = tokens.size() - i;
         if (n_eval > 512) n_eval = 512;
-        if (llama_decode(ctx, llama_batch_get_one(&tokens[i], n_eval, i, 0))) {
+        if (llama_decode(ctx, llama_batch_get_one(&tokens[i], n_eval))) {
             return env->NewStringUTF("Failed to eval");
         }
     }
@@ -86,7 +95,7 @@ Java_com_holoscend_chat_MainActivity_completion(JNIEnv *env, jobject thiz, jstri
     llama_token curr_token;
 
     // Set up sampling
-    auto sparams = common_sampler_params_default();
+    common_params_sampling sparams;
     auto sampler = common_sampler_init(model, sparams);
 
     for (int i = 0; i < 128; i++) {
@@ -100,7 +109,7 @@ Java_com_holoscend_chat_MainActivity_completion(JNIEnv *env, jobject thiz, jstri
         if (n < 0) break;
         response += std::string(buf, n);
 
-        if (llama_decode(ctx, llama_batch_get_one(&curr_token, 1, tokens.size() + i, 0))) {
+        if (llama_decode(ctx, llama_batch_get_one(&curr_token, 1))) {
             break;
         }
     }

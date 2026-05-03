@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.22.1)
 project("chat")
 
 # llama.cpp options
+set(LLAMA_BUILD_COMMON ON CACHE BOOL "llama: build common" FORCE)
 set(LLAMA_BUILD_TESTS OFF CACHE BOOL "llama: build tests" FORCE)
 set(LLAMA_BUILD_EXAMPLES OFF CACHE BOOL "llama: build examples" FORCE)
 set(LLAMA_BUILD_SERVER OFF CACHE BOOL "llama: build server" FORCE)

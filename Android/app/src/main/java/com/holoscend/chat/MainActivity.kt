@@ -75,19 +75,25 @@ class MainActivity : ComponentActivity() {
 
     private fun loadModel() {
         lifecycleScope.launch {
+            val modelPath = "/sdcard/Download/tiny-llama-chat.gguf"
             val success = withContext(Dispatchers.IO) {
-                val modelPath = "/sdcard/Download/tiny-llama-chat.gguf"
                 if (File(modelPath).exists()) {
                     initLlama(modelPath)
                 } else {
-                    false
+                    null // File not found
                 }
             }
-            if (success) {
-                isModelLoaded.value = true
-                statusMessage.value = "Model Loaded!"
-            } else {
-                statusMessage.value = "Error: Model not found at /sdcard/Download/tiny-llama-chat.gguf"
+            when (success) {
+                true -> {
+                    isModelLoaded.value = true
+                    statusMessage.value = "Model Loaded!"
+                }
+                false -> {
+                    statusMessage.value = "Error: Failed to load model from $modelPath (invalid file or memory issues)"
+                }
+                null -> {
+                    statusMessage.value = "Error: Model not found at $modelPath. Please download tiny-llama-chat.gguf and place it in your Download folder."
+                }
             }
         }
     }
