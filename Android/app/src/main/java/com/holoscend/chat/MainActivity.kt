@@ -29,16 +29,20 @@ class MainActivity : ComponentActivity() {
     external fun initLlama(modelPath: String): Boolean
     external fun completion(prompt: String): String
 
-    init {
-        System.loadLibrary("native-lib")
-    }
-
     private val isModelLoaded = mutableStateOf(false)
     private val statusMessage = mutableStateOf("Initializing...")
+    private var libraryLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        try {
+            System.loadLibrary("native-lib")
+            libraryLoaded = true
+        } catch (e: UnsatisfiedLinkError) {
+            statusMessage.value = "Error: Native library not found!"
+        }
+
         checkPermissions()
 
         setContent {
@@ -74,6 +78,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun loadModel() {
+        if (!libraryLoaded) return
         lifecycleScope.launch {
             val modelPath = "/sdcard/Download/tiny-llama-chat.gguf"
             val success = withContext(Dispatchers.IO) {
