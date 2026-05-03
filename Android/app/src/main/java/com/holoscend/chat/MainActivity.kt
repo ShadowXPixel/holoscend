@@ -22,8 +22,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import com.holoscend.chat.ui.theme.ChatTheme
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
+    private val TAG = "MainActivity"
 
     external fun stringFromJNI(): String
     external fun initLlama(modelPath: String): Boolean
@@ -34,18 +36,26 @@ class MainActivity : ComponentActivity() {
     private var libraryLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate started")
         super.onCreate(savedInstanceState)
-        
+
         try {
+            Log.d(TAG, "Loading native-lib")
             System.loadLibrary("native-lib")
             libraryLoaded = true
+            Log.d(TAG, "native-lib loaded successfully")
+            Log.d(TAG, "Testing JNI: ${stringFromJNI()}")
         } catch (e: UnsatisfiedLinkError) {
+            Log.e(TAG, "Failed to load native-lib", e)
             statusMessage.value = "Error: Native library not found!"
         }
 
+        Log.d(TAG, "Checking permissions")
         checkPermissions()
 
+        Log.d(TAG, "Setting content")
         setContent {
+// ...
             ChatApp(
                 isLoaded = isModelLoaded.value,
                 status = statusMessage.value,
@@ -57,38 +67,52 @@ class MainActivity : ComponentActivity() {
         
         loadModel()
     }
-
-    private fun checkPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (!Environment.isExternalStorageManager()) {
+private fun checkPermissions() {
+    Log.d(TAG, "checkPermissions called")
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (!Environment.isExternalStorageManager()) {
+            Log.d(TAG, "Requesting MANAGE_EXTERNAL_STORAGE")
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start manage storage activity with package", e)
                 try {
-                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                    intent.data = Uri.parse("package:$packageName")
-                    startActivity(intent)
-                } catch (e: Exception) {
                     val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
                     startActivity(intent)
+                } catch (e2: Exception) {
+                    Log.e(TAG, "Failed to start manage storage activity", e2)
                 }
             }
-        } else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100)
-            }
+
+        }
+    } else {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Requesting READ_EXTERNAL_STORAGE")
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100)
         }
     }
+}
 
-    private fun loadModel() {
-        if (!libraryLoaded) return
-        lifecycleScope.launch {
-            val modelPath = "/sdcard/Download/tiny-llama-chat.gguf"
-            val success = withContext(Dispatchers.IO) {
-                if (File(modelPath).exists()) {
-                    initLlama(modelPath)
-                } else {
-                    null // File not found
-                }
+private fun loadModel() {
+    Log.d(TAG, "loadModel called, libraryLoaded: $libraryLoaded")
+    if (!libraryLoaded) return
+    lifecycleScope.launch {
+        val modelPath = "/sdcard/Download/tiny-llama-chat.gguf"
+        Log.d(TAG, "Attempting to load model from $modelPath")
+        val success = withContext(Dispatchers.IO) {
+            if (File(modelPath).exists()) {
+                Log.d(TAG, "Model file exists, initializing llama")
+                initLlama(modelPath)
+            } else {
+                Log.w(TAG, "Model file not found at $modelPath")
+                null // File not found
             }
-            when (success) {
+        }
+        Log.d(TAG, "initLlama result: $success")
+        when (success) {
+// ...
                 true -> {
                     isModelLoaded.value = true
                     statusMessage.value = "Model Loaded!"

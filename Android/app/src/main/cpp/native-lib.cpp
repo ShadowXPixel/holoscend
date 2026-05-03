@@ -14,6 +14,14 @@ static llama_model * model = nullptr;
 static llama_context * ctx = nullptr;
 
 extern "C"
+JNIEXPORT jint JNICALL
+JNI_OnLoad(JavaVM* vm, void* reserved) {
+    LOGI("JNI_OnLoad started");
+    llama_backend_init();
+    return JNI_VERSION_1_6;
+}
+
+extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_holoscend_chat_MainActivity_initLlama(JNIEnv *env, jobject thiz, jstring model_path) {
     const char *path = env->GetStringUTFChars(model_path, nullptr);
@@ -28,8 +36,6 @@ Java_com_holoscend_chat_MainActivity_initLlama(JNIEnv *env, jobject thiz, jstrin
         llama_model_free(model);
         model = nullptr;
     }
-
-    llama_backend_init();
 
     auto mparams = llama_model_default_params();
     model = llama_model_load_from_file(path, mparams);
